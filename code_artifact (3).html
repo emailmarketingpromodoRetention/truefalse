@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Правда чи брехня майстра?</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Montserrat', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            orange: '#ff5c00',
+                            orangeHover: '#e05000',
+                            black: '#1A1A1A',
+                            dark: '#222222',
+                            metalLight: '#4b5056',
+                            metalDark: '#2a2d32',
+                        }
+                    },
+                    boxShadow: {
+                        'metal': '0 10px 20px rgba(0,0,0,0.6), inset 0 2px 4px rgba(255,255,255,0.1)',
+                        'glow-correct': '0 0 20px rgba(255, 92, 0, 0.7), inset 0 0 15px rgba(255, 92, 0, 0.4)',
+                        'glow-wrong': '0 0 20px rgba(255, 0, 0, 0.4), inset 0 0 15px rgba(0, 0, 0, 0.8)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #111;
+            /* Industrial diamond plate pattern */
+            background-image: 
+                linear-gradient(45deg, #181818 25%, transparent 25%, transparent 75%, #181818 75%, #181818),
+                linear-gradient(45deg, #181818 25%, transparent 25%, transparent 75%, #181818 75%, #181818);
+            background-size: 14px 14px;
+            background-position: 0 0, 7px 7px;
+            color: #ffffff;
+            -webkit-tap-highlight-color: transparent;
+            overflow-x: hidden;
+        }
+
+        /* Metal Plate styles */
+        .metal-plate {
+            background: linear-gradient(135deg, var(--tw-colors-brand-metalLight), var(--tw-colors-brand-metalDark));
+            border: 2px solid #5a5f66;
+            border-bottom-color: #1a1c1e;
+            border-right-color: #1a1c1e;
+            position: relative;
+        }
+
+        .rivet {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: radial-gradient(circle at 35% 35%, #999, #222);
+            border-radius: 50%;
+            box-shadow: inset 0 -1px 2px rgba(0,0,0,0.9), 0 1px 1px rgba(255,255,255,0.3);
+            border: 1px solid #111;
+        }
+        .rivet::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 15%;
+            width: 70%; height: 2px;
+            background: #111;
+            transform: translateY(-50%) rotate(45deg);
+            box-shadow: 0 1px 0 rgba(255,255,255,0.2);
+        }
+        .rivet-tl { top: 12px; left: 12px; }
+        .rivet-tr { top: 12px; right: 12px; transform: rotate(30deg); }
+        .rivet-bl { bottom: 12px; left: 12px; transform: rotate(75deg); }
+        .rivet-br { bottom: 12px; right: 12px; transform: rotate(-15deg); }
+
+        /* 3D Flip Container */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .transform-style-3d {
+            transform-style: preserve-3d;
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+        .is-flipped {
+            transform: rotateY(180deg);
+        }
+
+        /* Animations */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0) rotateY(180deg); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px) rotateY(180deg); }
+            20%, 40%, 60%, 80% { transform: translateX(5px) rotateY(180deg); }
+        }
+        .animate-shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        /* Buttons */
+        .btn-heavy {
+            position: relative;
+            background: linear-gradient(to bottom, #3a3f44, #1c1f22);
+            border: 2px solid #555;
+            border-bottom: 4px solid #111;
+            transition: all 0.1s;
+        }
+        .btn-heavy:active:not(:disabled) {
+            transform: translateY(2px);
+            border-bottom: 2px solid #111;
+        }
+        .btn-orange-heavy {
+            background: linear-gradient(to bottom, var(--tw-colors-brand-orange), #c43500);
+            border: 2px solid #ff7333;
+            border-bottom: 4px solid #731e07;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        .btn-orange-heavy:active:not(:disabled) {
+            transform: translateY(2px);
+            border-bottom: 2px solid #731e07;
+        }
+        
+        .hide { display: none !important; }
+        
+        /* Custom Scrollbar for explanation */
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+        .custom-scroll::-webkit-scrollbar-thumb { background: var(--tw-colors-brand-orange); border-radius: 4px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans">
+
+    <header class="w-full bg-brand-black border-b-4 border-brand-orange shadow-lg relative z-10">
+        <div class="max-w-3xl mx-auto px-4 py-4 flex items-center justify-center relative">
+            <div class="absolute left-4 bg-brand-orange text-white font-black text-sm sm:text-base px-2 py-1 rounded-sm tracking-tighter shadow-md">
+                DNIPRO-M
+            </div>
+            <h1 class="text-lg sm:text-xl font-black uppercase tracking-widest text-gray-200 text-center ml-24 sm:ml-0">
+                Правда чи Брехня?
+            </h1>
+        </div>
+    </header>
+
+    <main class="flex-grow flex items-center justify-center p-4 relative z-10 w-full max-w-2xl mx-auto my-4">
+        
+        <!-- 1. Intro Screen -->
+        <div id="intro-screen" class="w-full text-center metal-plate rounded-xl p-8 shadow-metal">
+            <div class="rivet rivet-tl"></div><div class="rivet rivet-tr"></div>
+            <div class="rivet rivet-bl"></div><div class="rivet rivet-br"></div>
+            
+            <svg class="w-20 h-20 mx-auto text-brand-orange mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+            <h2 class="text-2xl sm:text-3xl font-black uppercase mb-4 text-white">Перевір свої знання</h2>
+            <p class="text-gray-300 mb-8 font-medium">3 твердження від майстра. Відгадай, що правда, а що брехня, та отримай промокод на знижку!</p>
+            
+            <button onclick="startGame()" class="w-full sm:w-2/3 mx-auto block btn-orange-heavy rounded-lg py-4 text-xl font-black uppercase text-white tracking-widest">
+                Почати гру
+            </button>
+        </div>
+
+        <!-- 2. Game Screen -->
+        <div id="game-screen" class="w-full hide flex-col gap-6">
+            
+            <!-- Progress Bar -->
+            <div class="w-full bg-brand-black p-3 rounded-lg border border-gray-700 flex flex-col gap-2 shadow-inner">
+                <div class="flex justify-between items-center px-1">
+                    <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Прогрес</span>
+                    <span id="progress-text" class="text-sm font-black text-brand-orange">1 / 3</span>
+                </div>
+                <div class="h-2 w-full bg-gray-800 rounded-full overflow-hidden">
+                    <div id="progress-bar" class="h-full bg-brand-orange transition-all duration-500 w-0"></div>
+                </div>
+            </div>
+
+            <!-- 3D Card -->
+            <div class="perspective-1000 w-full h-[320px] sm:h-[280px]">
+                <div id="card-inner" class="w-full h-full relative transition-transform duration-700 transform-style-3d shadow-metal rounded-xl rounded-xl">
+                    
+                    <!-- Front face -->
+                    <div class="absolute inset-0 backface-hidden metal-plate rounded-xl flex flex-col p-6 items-center justify-center text-center">
+                        <div class="rivet rivet-tl"></div><div class="rivet rivet-tr"></div>
+                        <div class="rivet rivet-bl"></div><div class="rivet rivet-br"></div>
+                        
+                        <div class="w-12 h-12 rounded-full bg-brand-black border-2 border-brand-orange flex items-center justify-center mb-4 shadow-[0_0_10px_rgba(255,92,0,0.5)]">
+                            <span class="text-brand-orange font-black text-xl">?</span>
+                        </div>
+                        <h3 id="statement-text" class="text-xl sm:text-2xl font-bold text-white drop-shadow-md leading-snug">
+                            Завантаження...
+                        </h3>
+                    </div>
+
+                    <!-- Back face (Explanation) -->
+                    <div id="card-back" class="absolute inset-0 backface-hidden rotate-y-180 metal-plate rounded-xl flex flex-col p-6 justify-between text-center transition-shadow duration-300 border-2 border-transparent">
+                        <div class="rivet rivet-tl"></div><div class="rivet rivet-tr"></div>
+                        <div class="rivet rivet-bl"></div><div class="rivet rivet-br"></div>
+                        
+                        <div class="flex flex-col items-center justify-center h-full overflow-hidden">
+                            <h3 id="result-title" class="text-2xl font-black uppercase mb-3 tracking-wide">...</h3>
+                            <div class="custom-scroll overflow-y-auto pr-2 max-h-[140px]">
+                                <p id="explanation-text" class="text-sm sm:text-base font-medium text-gray-200">...</p>
+                            </div>
+                        </div>
+
+                        <button id="next-btn" onclick="nextQuestion()" class="w-full mt-4 btn-orange-heavy rounded py-3 text-sm font-black uppercase text-white tracking-widest shadow-lg opacity-0 transition-opacity duration-300">
+                            Далі
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div id="action-buttons" class="grid grid-cols-2 gap-4 transition-opacity duration-300">
+                <button onclick="handleAnswer(true)" class="btn-heavy bg-green-900/20 hover:bg-green-800/30 border-green-700/50 rounded-lg py-5 flex flex-col items-center gap-2 group">
+                    <svg class="w-8 h-8 text-green-500 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                    <span class="text-lg font-black uppercase tracking-widest text-white">Правда</span>
+                </button>
+                <button onclick="handleAnswer(false)" class="btn-heavy bg-red-900/20 hover:bg-red-800/30 border-red-700/50 rounded-lg py-5 flex flex-col items-center gap-2 group">
+                    <svg class="w-8 h-8 text-red-500 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    <span class="text-lg font-black uppercase tracking-widest text-white">Брехня</span>
+                </button>
+            </div>
+            
+        </div>
+
+        <!-- 3. Result Screen -->
+        <div id="result-screen" class="w-full hide text-center metal-plate rounded-xl p-8 shadow-metal">
+            <div class="rivet rivet-tl"></div><div class="rivet rivet-tr"></div>
+            <div class="rivet rivet-bl"></div><div class="rivet rivet-br"></div>
+            
+            <div id="result-icon" class="mb-4">
+                <!-- Injected via JS -->
+            </div>
+            
+            <h2 id="final-score" class="text-3xl font-black uppercase mb-2 text-white">0 з 3 правильно!</h2>
+            <p id="final-message" class="text-gray-300 mb-6 font-medium">...</p>
+            
+            <div class="w-full bg-brand-dark p-5 rounded-lg border border-brand-orange shadow-inner mb-6 relative overflow-hidden">
+                <div class="absolute -right-4 -top-4 w-16 h-16 bg-brand-orange rotate-45 opacity-20"></div>
+                <div class="absolute -left-4 -bottom-4 w-16 h-16 bg-brand-orange rotate-45 opacity-20"></div>
+                
+                <p class="text-xs text-brand-orange uppercase font-bold mb-3 tracking-widest">Твій промокод</p>
+                <p id="reward-desc" class="text-sm font-semibold mb-4 text-white z-10 relative">Знижка 5% на будь-який інструмент</p>
+                
+                <div class="flex items-center bg-black rounded border border-gray-600 relative z-10 shadow-md">
+                    <code id="promo-code" class="px-4 py-3 text-xl font-black text-brand-orange flex-grow tracking-wider">PROMO5</code>
+                    <button onclick="copyPromo()" class="bg-gray-800 hover:bg-gray-700 px-5 py-4 transition-colors border-l border-gray-600" title="Скопіювати">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                    </button>
+                </div>
+            </div>
+            
+            <button onclick="location.reload()" class="w-full btn-heavy rounded py-3 text-sm font-bold uppercase text-gray-300 hover:text-white">
+                Грати знову
+            </button>
+        </div>
+
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-24 left-1/2 transform -translate-x-1/2 z-[100] bg-green-600 text-white px-6 py-3 border-2 border-green-800 shadow-[0_5px_15px_rgba(0,0,0,0.5)] font-bold transition-all duration-300 opacity-0 -translate-y-4 pointer-events-none rounded uppercase tracking-wide">
+        Промокод скопійовано!
+    </div>
+
+    <script>
+        // --- 1. GAME DATA ---
+        const ALL_STATEMENTS = [
+            {
+                text: "Перфоратором зручно закручувати шурупи.",
+                isTrue: false,
+                explanation: "Це незручно і можна зірвати шліц або пошкодити матеріал. Для цього є шуруповерт."
+            },
+            {
+                text: "Свердла по металу можна використовувати для свердління дерева.",
+                isTrue: true,
+                explanation: "Вони чудово справляються з деревом, хоча є й спеціальні свердла (з центруючим вістрям)."
+            },
+            {
+                text: "На болгарку (КШМ) можна ставити пильний диск по дереву.",
+                isTrue: false,
+                explanation: "Це категорично заборонено і вкрай небезпечно через величезний ризик зворотної віддачі!"
+            },
+            {
+                text: "Безщіткові (Brushless) двигуни служать довше за щіткові.",
+                isTrue: true,
+                explanation: "Відсутність тертя щіток зменшує знос деталей і збільшує ефективність інструменту."
+            },
+            {
+                text: "Літій-іонні акумулятори потрібно повністю розряджати перед зарядкою.",
+                isTrue: false,
+                explanation: "Вони не мають «ефекту пам'яті», глибокий розряд їм лише шкодить. Краще заряджати регулярно."
+            },
+            {
+                text: "Ударний дриль і перфоратор мають однаковий механізм удару.",
+                isTrue: false,
+                explanation: "У дриля слабкий механічний удар (тріщітка), а у перфоратора — потужний електропневматичний."
+            },
+            {
+                text: "Для точного різання керамічної плитки краще використовувати суцільний алмазний диск.",
+                isTrue: true,
+                explanation: "Суцільний диск (без зубців) робить чистий різ без сколів на емалі."
+            },
+            {
+                text: "Чим вища потужність інструменту, тим швидше він зношується.",
+                isTrue: false,
+                explanation: "Навпаки. Потужний інструмент працює без перевантаження, тому його ресурс часто більший."
+            },
+            {
+                text: "WD-40 — це ідеальне довгострокове мастило для підшипників.",
+                isTrue: false,
+                explanation: "Це насамперед вологовитискувач і розчинник. Він швидко випаровується. Для підшипників потрібне густе мастило."
+            },
+            {
+                text: "Будівельні пилососи можуть збирати не лише пил, а й воду.",
+                isTrue: true,
+                explanation: "Більшість сучасних будівельних пилососів підтримують функцію вологого прибирання та збору рідини."
+            }
+        ];
+
+        // --- 2. GAME STATE ---
+        const TOTAL_QUESTIONS = 3;
+        let currentQuestions = [];
+        let currentIndex = 0;
+        let score = 0;
+        let isAnimating = false; // Prevent double clicks during animations
+
+        // DOM Elements
+        const elIntro = document.getElementById('intro-screen');
+        const elGame = document.getElementById('game-screen');
+        const elResult = document.getElementById('result-screen');
+        
+        const elCardInner = document.getElementById('card-inner');
+        const elCardBack = document.getElementById('card-back');
+        const elStatement = document.getElementById('statement-text');
+        const elResultTitle = document.getElementById('result-title');
+        const elExplanation = document.getElementById('explanation-text');
+        const elNextBtn = document.getElementById('next-btn');
+        const elActionBtns = document.getElementById('action-buttons');
+        
+        const elProgressText = document.getElementById('progress-text');
+        const elProgressBar = document.getElementById('progress-bar');
+
+        // --- 3. UTILITY FUNCTIONS ---
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        // --- 4. GAME LOGIC ---
+        function startGame() {
+            // Pick 7 random questions
+            const shuffled = shuffle([...ALL_STATEMENTS]);
+            currentQuestions = shuffled.slice(0, TOTAL_QUESTIONS);
+            
+            currentIndex = 0;
+            score = 0;
+            
+            elIntro.classList.add('hide');
+            elGame.classList.remove('hide');
+            elGame.style.display = 'flex'; // overriding tailwind class restriction
+            
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            isAnimating = false;
+            const q = currentQuestions[currentIndex];
+            
+            // Update Progress
+            elProgressText.textContent = `${currentIndex + 1} / ${TOTAL_QUESTIONS}`;
+            const percent = ((currentIndex) / TOTAL_QUESTIONS) * 100;
+            elProgressBar.style.width = `${percent}%`;
+            
+            // Reset Card State
+            elCardInner.classList.remove('is-flipped', 'animate-shake');
+            elCardBack.classList.remove('shadow-glow-correct', 'shadow-glow-wrong', 'border-brand-orange', 'border-red-600');
+            elNextBtn.style.opacity = '0';
+            elNextBtn.style.pointerEvents = 'none';
+            
+            // Show action buttons
+            elActionBtns.style.opacity = '1';
+            elActionBtns.style.pointerEvents = 'auto';
+
+            // Set Front Text
+            elStatement.textContent = q.text;
+        }
+
+        function handleAnswer(userAnswer) {
+            if (isAnimating) return;
+            isAnimating = true;
+
+            const q = currentQuestions[currentIndex];
+            const isCorrect = (userAnswer === q.isTrue);
+            
+            if (isCorrect) score++;
+
+            // Hide action buttons smoothly
+            elActionBtns.style.opacity = '0';
+            elActionBtns.style.pointerEvents = 'none';
+
+            // Prepare Back Face
+            if (isCorrect) {
+                elResultTitle.textContent = "Правильно!";
+                elResultTitle.className = "text-2xl font-black uppercase mb-3 tracking-wide text-brand-orange";
+                elCardBack.classList.add('shadow-glow-correct', 'border-brand-orange');
+            } else {
+                elResultTitle.textContent = "Помилка";
+                elResultTitle.className = "text-2xl font-black uppercase mb-3 tracking-wide text-red-500";
+                elCardBack.classList.add('shadow-glow-wrong', 'border-red-600');
+            }
+            
+            elExplanation.textContent = q.explanation;
+
+            // Trigger Flip
+            setTimeout(() => {
+                elCardInner.classList.add('is-flipped');
+                
+                // If wrong, add shake animation on top of the flipped state
+                if (!isCorrect) {
+                    setTimeout(() => {
+                        elCardInner.classList.add('animate-shake');
+                    }, 300); // Start shake halfway through flip
+                }
+
+                // Show "Next" button after flip completes
+                setTimeout(() => {
+                    elNextBtn.style.opacity = '1';
+                    elNextBtn.style.pointerEvents = 'auto';
+                    
+                    // Complete progress bar for this step
+                    const percent = ((currentIndex + 1) / TOTAL_QUESTIONS) * 100;
+                    elProgressBar.style.width = `${percent}%`;
+                }, 800);
+
+            }, 200);
+        }
+
+        function nextQuestion() {
+            if (currentIndex < TOTAL_QUESTIONS - 1) {
+                // Flip back
+                elCardInner.classList.remove('is-flipped', 'animate-shake');
+                elNextBtn.style.opacity = '0';
+                elNextBtn.style.pointerEvents = 'none';
+                
+                // Wait for unflip animation, then render next
+                setTimeout(() => {
+                    currentIndex++;
+                    renderQuestion();
+                }, 600);
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            elGame.style.display = 'none';
+            elGame.classList.add('hide');
+            elResult.classList.remove('hide');
+
+            document.getElementById('final-score').textContent = `${score} з ${TOTAL_QUESTIONS} правильно!`;
+            
+            const iconContainer = document.getElementById('result-icon');
+            const msgEl = document.getElementById('final-message');
+            const rewardDesc = document.getElementById('reward-desc');
+            const promoCode = document.getElementById('promo-code');
+
+            // Logic based on score
+            if (score === 3) {
+                iconContainer.innerHTML = `<svg class="w-20 h-20 mx-auto text-brand-orange mb-2 drop-shadow-[0_0_15px_rgba(255,92,0,0.6)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>`;
+                msgEl.textContent = "Справжній профі! Ти знаєш свій інструмент на 100%.";
+                rewardDesc.textContent = "Твій максимальний бонус: Знижка -15%";
+                promoCode.textContent = "PROMO15";
+            } else {
+                iconContainer.innerHTML = `<svg class="w-20 h-20 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+                msgEl.textContent = "Є куди рости! Майстерність приходить з досвідом.";
+                rewardDesc.textContent = "Заохочувальний бонус: Знижка -5%";
+                promoCode.textContent = "PROMO5";
+            }
+        }
+
+        function copyPromo() {
+            const codeText = document.getElementById('promo-code').textContent;
+            
+            // Create temporary textarea for iFrame compatibility
+            const textArea = document.createElement("textarea");
+            textArea.value = codeText;
+            document.body.appendChild(textArea);
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                showToast();
+            } catch (err) {
+                console.error('Copy failed', err);
+            } finally {
+                document.body.removeChild(textArea);
+            }
+        }
+
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.style.opacity = '1';
+            toast.style.transform = 'translate(-50%, 0)';
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translate(-50%, -10px)';
+            }, 2500);
+        }
+    </script>
+</body>
+</html>
